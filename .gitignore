@@ -1,0 +1,48 @@
+# -----------------------------
+# Arquivos de ambiente Python
+# -----------------------------
+__pycache__/
+*.py[cod]
+*.so
+*.egg
+*.egg-info/
+dist/
+build/
+.eggs/
+
+# Virtualenv / venv
+.venv/
+venv/
+ENV/
+
+# Cache de pacotes
+pip-wheel-metadata/
+*.log
+
+# -----------------------------
+# Jupyter
+# -----------------------------
+.ipynb_checkpoints/
+*.ipynb_convert/
+jupyter_cache/
+
+# -----------------------------
+# Dados e modelos (DVC rastreia)
+# -----------------------------
+/data/
+/models/
+
+# OBS: Os .dvc que apontam para esses diretórios NÃO são ignorados
+# Exemplo: models.dvc, data.dvc, etc. continuam versionados
+
+# -----------------------------
+# Arquivos do sistema
+# -----------------------------
+.DS_Store
+Thumbs.db
+
+# -----------------------------
+# Configs sensíveis
+# -----------------------------
+*.env
+.envrc

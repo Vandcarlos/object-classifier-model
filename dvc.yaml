@@ -1,0 +1,36 @@
+stages:
+  train:
+    cmd: python -m scripts.train
+    deps:
+    - scripts/train.py
+    - src/config.py
+    - src/training/labels_loader.py
+    - src/training/model_loader.py
+    - src/training/train_loop.py
+    params:
+    - configs/config.yaml:
+      - labels_url
+      - paths.base.model
+      - paths.trained.labels
+      - paths.trained.model
+    outs:
+    - models/base/model_base.h5
+    - models/trained/model_labels.txt
+    - models/trained/model_trained.h5
+  convert:
+    cmd: python -m scripts.convert
+    deps:
+    - scripts/convert.py
+    - src/config.py
+    - src/conversion/android_converter.py
+    - src/conversion/convert_loop.py
+    - src/conversion/ios_converter.py
+    params:
+    - configs/config.yaml:
+      - paths.trained.labels
+      - paths.trained.model
+      - paths.artifactory.android
+      - paths.artifactory.ios
+    outs:
+    - models/artifactory/android/object_classifier.tflite
+    - models/artifactory/ios/ObjectClassifier.mlpackage

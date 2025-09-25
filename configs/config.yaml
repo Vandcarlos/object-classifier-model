@@ -1,0 +1,23 @@
+paths:
+  data:
+    raw: data/raw
+    processed: data/processed
+
+  base:
+    model: models/base/model_base.h5
+
+  trained:
+    model:  models/trained/model_trained.h5
+    labels: models/trained/model_labels.txt
+
+  artifactory:
+    android: models/artifactory/android/object_classifier.tflite
+    ios:     models/artifactory/ios/ObjectClassifier.mlpackage
+
+labels_url: https://storage.googleapis.com/download.tensorflow.org/data/ImageNetLabels.txt
+
+inferences:
+  - predict_class: tiger_cat
+    path: assets/tiger-cat-inference.jpg
+  - predict_class: tiger_cat
+    path: assets/tiger-cat-inference.jpg

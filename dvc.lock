@@ -1,0 +1,85 @@
+schema: '2.0'
+stages:
+  train:
+    cmd: python -m scripts.train
+    deps:
+    - path: scripts/train.py
+      hash: md5
+      md5: ec2f30f0935cfbb329902d8fcfd8d561
+      size: 1342
+    - path: src/config.py
+      hash: md5
+      md5: 428905a81146bf64068697b9aecb71c5
+      size: 416
+    - path: src/training/labels_loader.py
+      hash: md5
+      md5: 8201c604cc1516394c74deff57792a99
+      size: 588
+    - path: src/training/model_loader.py
+      hash: md5
+      md5: 0631cc51341f22eed2edf290d9717263
+      size: 437
+    - path: src/training/train_loop.py
+      hash: md5
+      md5: e0b0d4815bafed2920620bbcbd1bcfad
+      size: 569
+    params:
+      configs/config.yaml:
+        labels_url: 
+          https://storage.googleapis.com/download.tensorflow.org/data/ImageNetLabels.txt
+        paths.base.model: models/base/model_base.h5
+        paths.trained.labels: models/trained/model_labels.txt
+        paths.trained.model: models/trained/model_trained.h5
+    outs:
+    - path: models/base/model_base.h5
+      hash: md5
+      md5: ca446eb50ee3b0155aeb1e118afcbd5d
+      size: 14631976
+    - path: models/trained/model_labels.txt
+      hash: md5
+      md5: 295d81f0039772b0c909237eb803b42d
+      size: 10484
+    - path: models/trained/model_trained.h5
+      hash: md5
+      md5: ca446eb50ee3b0155aeb1e118afcbd5d
+      size: 14631976
+  convert:
+    cmd: python -m scripts.convert
+    deps:
+    - path: scripts/convert.py
+      hash: md5
+      md5: 2326fadd6f7cf756623d6b783daf415e
+      size: 1578
+    - path: src/config.py
+      hash: md5
+      md5: 428905a81146bf64068697b9aecb71c5
+      size: 416
+    - path: src/conversion/android_converter.py
+      hash: md5
+      md5: 7dce4c76aa80337ecf7399875cccadac
+      size: 263
+    - path: src/conversion/convert_loop.py
+      hash: md5
+      md5: 08d3f4bb13cc5d835c5bc94f0a90eda7
+      size: 516
+    - path: src/conversion/ios_converter.py
+      hash: md5
+      md5: 9070a3b178a52daf6fee439f2c83e534
+      size: 1087
+    params:
+      configs/config.yaml:
+        paths.artifactory.android: 
+          models/artifactory/android/object_classifier.tflite
+        paths.artifactory.ios: models/artifactory/ios/ObjectClassifier.mlpackage
+        paths.trained.labels: models/trained/model_labels.txt
+        paths.trained.model: models/trained/model_trained.h5
+    outs:
+    - path: models/artifactory/android/object_classifier.tflite
+      hash: md5
+      md5: 2799fa1ed9661d31d4ed2c545fc34384
+      size: 3788880
+    - path: models/artifactory/ios/ObjectClassifier.mlpackage
+      hash: md5
+      md5: 13305b13f39f3f787c8e130226bd2c8a.dir
+      size: 7104828
+      nfiles: 3
