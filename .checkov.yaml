@@ -1,0 +1,15 @@
+skip-check:
+  - id: CKV_AWS_374
+    comment: "Geo restriction não necessária em sandbox; evitar overhead de config."
+  - id: CKV_AWS_86
+    comment: "Access logging do CloudFront desligado para reduzir custo em estudo."
+  - id: CKV_AWS_145
+    comment: "Sem KMS (US$1/mês) em sandbox; usar SSE-S3 (AES256) padrão."
+  - id: CKV_AWS_18
+    comment: "Sem S3 server access logging em sandbox para reduzir custo."
+  - id: CKV2_AWS_61
+    comment: "Sem lifecycle em sandbox; manter simples."
+  - id: CKV_AWS_21
+    comment: "Sem versioning em sandbox para economizar storage."
+  - id: CKV_AWS_144
+    comment: "Sem cross-region replication em sandbox."

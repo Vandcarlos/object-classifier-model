@@ -28,3 +28,5 @@ jobs:
         uses: bridgecrewio/checkov-action@master
         with:
           directory: infra
+          config_file: .checkov.yaml
+
