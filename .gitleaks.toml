@@ -1,0 +1,29 @@
+title = "gitleaks config"
+
+[extend]
+# Usa regras padrão do gitleaks e acrescenta as suas
+useDefault = true
+
+[allowlist]
+# Ignorar caminhos (ex.: arquivos gerados, testes)
+paths = [
+  '''^\.?git/''',
+  '''^\.terraform/''',
+  '''\.tfstate(\.backup)?$''',
+  '''^infra/.*/\.terraform/''',
+  '''^tests?/data/''',
+  '''^examples?/''',
+]
+
+# Permitir valores específicos (ex.: chaves fake de teste)
+regexes = [
+  '''AKIAIOSFODNN7EXAMPLE''',
+  '''SECRET_TEST_TOKEN''',
+]
+
+[ruleSettings]
+# Reduz falsos positivos ajustando entropia mínima
+entropy = 3.5
+
+# Mascara segredos nos logs do CI
+redact = true
