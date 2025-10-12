@@ -28,7 +28,7 @@ jobs:
         uses: bridgecrewio/checkov-action@master
         with:
           directory: infra
-          skip_check: CKV2_AWS_47,CKV_AWS_68,CKV_AWS_86, CKV_AWS_305,CKV_AWS_310,CKV_AWS_174, CKV_AWS_290,CKV_AWS_355
+          skip_check: "CKV2_AWS_47,CKV_AWS_68,CKV_AWS_86, CKV_AWS_305,CKV_AWS_310,CKV_AWS_174, CKV_AWS_290,CKV_AWS_355"
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
