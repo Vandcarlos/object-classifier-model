@@ -1,0 +1,36 @@
+name: Terraform (plan/apply)
+
+on:
+  push:
+    branches: [ "main" ]
+  workflow_dispatch:
+
+permissions:
+  id-token: write
+  contents: read
+
+jobs:
+  tf:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        dir:
+          - infra/stacks/oidc_github
+          - infra/stacks/artifacts
+    steps:
+      - uses: actions/checkout@v4
+      - uses: hashicorp/setup-terraform@v3
+      - name: Configure AWS (OIDC)
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: arn:aws:iam::048153623156:role/github-ml-artifacts-deploy
+          aws-region: us-east-1
+      - name: Init & Plan
+        working-directory: ${{ matrix.dir }}
+        run: |
+          terraform init -input=false
+          terraform plan -out=tf.plan -input=false
+      - name: Apply (auto)
+        if: github.ref == 'refs/heads/main'
+        working-directory: ${{ matrix.dir }}
+        run: terraform apply --auto-approve tf.plan

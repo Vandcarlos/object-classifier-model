@@ -1,0 +1,14 @@
+name: CI (scan)
+on: [pull_request]
+
+jobs:
+  scan:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: gitleaks/gitleaks-action@v2
+        with: { args: "--no-git -v" }
+      - uses: aquasecurity/tfsec-action@v1.0.3
+        with: { working_directory: infra }
+      - uses: bridgecrewio/checkov-action@master
+        with: { directory: infra }
