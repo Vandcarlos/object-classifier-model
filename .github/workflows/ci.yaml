@@ -29,4 +29,6 @@ jobs:
         with:
           directory: infra
           config_file: .checkov.yaml
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 

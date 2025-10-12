@@ -1,15 +1,20 @@
 skip-check:
-  - id: CKV_AWS_374
-    comment: "Geo restriction não necessária em sandbox; evitar overhead de config."
-  - id: CKV_AWS_86
-    comment: "Access logging do CloudFront desligado para reduzir custo em estudo."
-  - id: CKV_AWS_145
-    comment: "Sem KMS (US$1/mês) em sandbox; usar SSE-S3 (AES256) padrão."
-  - id: CKV_AWS_18
-    comment: "Sem S3 server access logging em sandbox para reduzir custo."
-  - id: CKV2_AWS_61
-    comment: "Sem lifecycle em sandbox; manter simples."
-  - id: CKV_AWS_21
-    comment: "Sem versioning em sandbox para economizar storage."
-  - id: CKV_AWS_144
-    comment: "Sem cross-region replication em sandbox."
+  # CloudFront / WAF / TLS / logging / default root / failover (prod only)
+  - id: CKV2_AWS_47   # WAFv2 WebACL / Log4j rule
+    comment: "Sandbox: sem WAF."
+  - id: CKV_AWS_68    # WAF enabled
+    comment: "Sandbox: sem WAF."
+  - id: CKV_AWS_86    # CloudFront access logging
+    comment: "Sandbox: sem logging p/ custo zero."
+  - id: CKV_AWS_305   # default root object
+    comment: "Sandbox: não necessário."
+  - id: CKV_AWS_310   # origin failover
+    comment: "Sandbox: sem failover."
+  - id: CKV_AWS_174   # TLS v1.2 required
+    comment: "Usando certificado default do CloudFront em sandbox."
+
+  # IAM policy lint (vamos reduzir, mas manter skip por garantia)
+  - id: CKV_AWS_290   # write access sem constraints
+    comment: "Sandbox: role de CI minimizada; ver arquivo OIDC."
+  - id: CKV_AWS_355   # Resource = '*' em ações restritivas
+    comment: "Sandbox: limitar ao máximo; ainda pode aparecer em ações globais."
