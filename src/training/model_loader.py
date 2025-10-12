@@ -11,7 +11,7 @@ def load_base_model():
         "weights": "imagenet"
     }
 
-    print(f"Inicando carregamento do modelo com parâmetros {kwargs}")
+    print(f"Inicando carregamento do modelo com os hiperparâmetros {kwargs}")
     model = tf.keras.applications.MobileNetV2(**kwargs)
     print("Modelo carregado ")
 
