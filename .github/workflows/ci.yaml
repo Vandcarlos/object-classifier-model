@@ -1,0 +1,35 @@
+name: CI (scan)
+on: [pull_request]
+
+permissions:
+  contents: read
+  pull-requests: read  # gitleaks precisa ler o PR
+  # opcional: security-events: write (se enviar resultados para o Security tab)
+
+jobs:
+  scan:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Gitleaks (scan PR)
+        uses: gitleaks/gitleaks-action@v2
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: IaC Security (tfsec)
+        uses: aquasecurity/tfsec-action@v1.0.3
+        with:
+          working_directory: infra
+
+      - name: Checkov
+        uses: bridgecrewio/checkov-action@master
+        soft_fail: true
+        with:
+          directory: infra
+          skip_check: "CKV2_AWS_47,CKV_AWS_68,CKV_AWS_86, CKV_AWS_305,CKV_AWS_310,CKV_AWS_174, CKV_AWS_290,CKV_AWS_355"
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+

@@ -1,0 +1,12 @@
+title = "gitleaks config"
+
+[extend] 
+useDefault = true
+
+[allowlist]
+paths = ['''^\.terraform/''', '''\.tfstate(\.backup)?$''', '''^infra/.*/\.terraform/''']
+regexes = ['''AKIAIOSFODNN7EXAMPLE''']
+
+[ruleSettings]
+entropy = 3.5
+redact = true

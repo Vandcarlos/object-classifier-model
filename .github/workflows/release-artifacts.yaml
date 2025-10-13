@@ -1,0 +1,65 @@
+name: Release ML Artifacts
+
+on:
+  push:
+    tags: [ "v*.*.*" ]
+
+permissions:
+  id-token: write
+  contents: read
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    env:
+      MODEL_NAME: mobilenetv2
+      ARTIFACTS_BUCKET: ml-artifacts-048153623156
+      AWS_REGION: us-east-1
+      CDN_DOMAIN: d1y8lqisovngwq.cloudfront.net
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install deps
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+          # Ajuste se seus scripts precisarem de TF/CoreML:
+          # pip install tensorflow==2.16.1 coremltools==7.2
+
+      - name: Version from tag
+        id: v
+        run: echo "version=${GITHUB_REF_NAME#v}" >> $GITHUB_OUTPUT
+
+      - name: Build artifacts
+        run: |
+          python scripts/build_artifacts.py \
+            --model $MODEL_NAME \
+            --version ${{ steps.v.outputs.version }} \
+            --out-dir out/
+
+      - name: Configure AWS (OIDC)
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: arn:aws:iam::048153623156:role/github-ml-artifacts-deploy
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Upload to S3
+        run: |
+          aws s3 cp out/ "s3://${ARTIFACTS_BUCKET}/${MODEL_NAME}/v${{ steps.v.outputs.version }}/" --recursive --only-show-errors
+
+      - name: Update manifest.json
+        run: |
+          MANIFEST_KEY="${MODEL_NAME}/manifest.json"
+          TMP=$(mktemp)
+          aws s3 cp "s3://${ARTIFACTS_BUCKET}/${MANIFEST_KEY}" "$TMP" --only-show-errors || echo '{"model":"'${MODEL_NAME}'","versions":[]}' > "$TMP"
+
+          python scripts/update_manifest.py \
+            --manifest "$TMP" \
+            --cdn-base "https://${{ env.CDN_DOMAIN }}/${MODEL_NAME}" \
+            --version "${{ steps.v.outputs.version }}" \
+            --artifacts out/
+
+          aws s3 cp "$TMP" "s3://${ARTIFACTS_BUCKET}/${MANIFEST_KEY}" --content-type "application/json" --only-show-errors
