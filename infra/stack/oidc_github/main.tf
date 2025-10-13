@@ -37,16 +37,33 @@ resource "aws_iam_policy" "boundary" {
   policy = jsonencode({
     Version = "2012-10-17",
     Statement = [
-      {
-        "Effect" : "Allow",
-        "Action" : ["s3:*"],
-        "Resource" : [
-          "arn:aws:s3:::ml-artifacts-*",
-          "arn:aws:s3:::ml-artifacts-*/*",
-          "arn:aws:s3:::tfstate-ml-*",
-          "arn:aws:s3:::tfstate-ml-*/*"
-        ]
-      },
+     # --- S3: nível de BUCKET (listar e ler metadados do bucket) ---
+			{
+			  "Effect": "Allow",
+			  "Action": [
+			    "s3:ListBucket",
+			    "s3:GetBucketLocation",
+			    "s3:GetBucketVersioning",
+			    "s3:PutBucketPolicy"    // necessário p/ aplicar a bucket policy do OAC no artifacts
+			  ],
+			  "Resource": [
+			    "arn:aws:s3:::ml-artifacts-*",
+			    "arn:aws:s3:::tfstate-ml-*"
+			  ]
+			},
+			# --- S3: nível de OBJETO (state + artefatos) ---
+			{
+			  "Effect": "Allow",
+			  "Action": [
+			    "s3:GetObject",
+			    "s3:PutObject",
+			    "s3:DeleteObject"
+			  ],
+			  "Resource": [
+			    "arn:aws:s3:::ml-artifacts-*/*",
+			    "arn:aws:s3:::tfstate-ml-*/*"
+			  ]
+			},
 			{
 			  "Effect":"Allow",
 			  "Action":[
@@ -92,21 +109,33 @@ resource "aws_iam_policy" "github_policy" {
   policy = jsonencode({
     Version = "2012-10-17",
     Statement = [
-      {
-        "Effect" : "Allow",
-        "Action" : [
-          "s3:PutObject",
-          "s3:GetObject",
-          "s3:DeleteObject",
-          "s3:ListBucket",
+      # --- S3: nível de BUCKET (listar e ler metadados do bucket) ---
+			{
+			  "Effect": "Allow",
+			  "Action": [
+			    "s3:ListBucket",
 			    "s3:GetBucketLocation",
-					"s3:GetBucketVersioning"
-        ],
-        "Resource" : [
-          "arn:aws:s3:::ml-artifacts-*",
-          "arn:aws:s3:::ml-artifacts-*/*"
-        ]
-      },
+			    "s3:GetBucketVersioning",
+			    "s3:PutBucketPolicy"    // necessário p/ aplicar a bucket policy do OAC no artifacts
+			  ],
+			  "Resource": [
+			    "arn:aws:s3:::ml-artifacts-*",
+			    "arn:aws:s3:::tfstate-ml-*"
+			  ]
+			},
+			# --- S3: nível de OBJETO (state + artefatos) ---
+			{
+			  "Effect": "Allow",
+			  "Action": [
+			    "s3:GetObject",
+			    "s3:PutObject",
+			    "s3:DeleteObject"
+			  ],
+			  "Resource": [
+			    "arn:aws:s3:::ml-artifacts-*/*",
+			    "arn:aws:s3:::tfstate-ml-*/*"
+			  ]
+			},
       {
 			  "Effect":"Allow",
 			  "Action":[

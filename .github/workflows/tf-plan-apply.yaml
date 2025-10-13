@@ -1,8 +1,7 @@
 name: Terraform (plan/apply)
 
 on:
-  push:
-    branches: [ "main" ]
+  push: { branches: [ "main" ] }
   workflow_dispatch:
 
 permissions:
@@ -10,59 +9,50 @@ permissions:
   contents: read
 
 jobs:
-  tf:
+  oidc:
     runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        dir:
-          - infra/stack/oidc_github
-          - infra/stack/artifacts
     steps:
       - uses: actions/checkout@v4
-
-      - name: Show repo tree (debug)
-        run: |
-          pwd
-          ls -la
-          find infra -maxdepth 3 -type d | sort || true
-
       - uses: hashicorp/setup-terraform@v3
-
       - name: Configure AWS (OIDC)
         uses: aws-actions/configure-aws-credentials@v4
         with:
           role-to-assume: arn:aws:iam::048153623156:role/github-ml-artifacts-deploy
           aws-region: us-east-1
-
-      - name: Ensure stack dir exists
+      - name: Init & Plan (OIDC)
         run: |
-          test -d "${{ matrix.dir }}" || { echo "::error::Missing dir ${{ matrix.dir }}"; exit 1; }
+          terraform -chdir=infra/stack/oidc_github init -input=false
+          terraform -chdir=infra/stack/oidc_github plan -out=tf.plan -input=false
+      - name: Apply (OIDC)
+        run: terraform -chdir=infra/stack/oidc_github apply --auto-approve tf.plan
 
-      - name: Terraform init
-        run: terraform -chdir=${{ matrix.dir }} init -input=false
+  artifacts:
+    needs: oidc   # <— garante ordem
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: hashicorp/setup-terraform@v3
+      - name: Configure AWS (OIDC) - fresh session
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: arn:aws:iam::048153623156:role/github-ml-artifacts-deploy
+          aws-region: us-east-1
 
-      # Se o dir atual for "artifacts", importe o bucket já existente no state remoto
-      - name: Import S3 bucket into state (artifacts only)
-        if: contains(matrix.dir, 'artifacts')
-        env:
-          BUCKET: ml-artifacts-048153623156
+      - name: Init (artifacts)
+        run: terraform -chdir=infra/stack/artifacts init -input=false
+
+      # importa o bucket existente para o state remoto (idempotente)
+      - name: Import S3 bucket into state (artifacts)
+        env: { BUCKET: ml-artifacts-048153623156 }
         run: |
           set -e
-          # se o recurso ainda não está no state e o bucket existe, importa
-          if ! terraform -chdir=${{ matrix.dir }} state list | grep -q '^aws_s3_bucket\.artifacts$'; then
+          if ! terraform -chdir=infra/stack/artifacts state list | grep -q '^aws_s3_bucket\.artifacts$'; then
             if aws s3api head-bucket --bucket "$BUCKET" 2>/dev/null; then
-              echo "Importing existing bucket $BUCKET into Terraform state..."
-              terraform -chdir=${{ matrix.dir }} import aws_s3_bucket.artifacts "$BUCKET"
-            else
-              echo "Bucket $BUCKET not found; skipping import."
+              terraform -chdir=infra/stack/artifacts import aws_s3_bucket.artifacts "$BUCKET"
             fi
-          else
-            echo "Bucket already in state; skipping import."
           fi
 
-      - name: Terraform plan
-        run: terraform -chdir=${{ matrix.dir }} plan -out=tf.plan -input=false
-
-      - name: Terraform apply
-        if: github.ref == 'refs/heads/main'
-        run: terraform -chdir=${{ matrix.dir }} apply --auto-approve tf.plan
+      - name: Plan (artifacts)
+        run: terraform -chdir=infra/stack/artifacts plan -out=tf.plan -input=false
+      - name: Apply (artifacts)
+        run: terraform -chdir=infra/stack/artifacts apply --auto-approve tf.plan
