@@ -47,11 +47,21 @@ resource "aws_iam_policy" "boundary" {
           "arn:aws:s3:::tfstate-ml-*/*"
         ]
       },
-      {
-        "Effect" : "Allow",
-        "Action" : ["cloudfront:CreateInvalidation"],
-        "Resource" : "*"
-      },
+			{
+			  "Effect":"Allow",
+			  "Action":[
+			    "cloudfront:CreateDistribution",
+			    "cloudfront:UpdateDistribution",
+			    "cloudfront:GetDistribution",
+			    "cloudfront:ListDistributions",
+			    "cloudfront:TagResource",
+			    "cloudfront:CreateOriginAccessControl",
+			    "cloudfront:UpdateOriginAccessControl",
+			    "cloudfront:GetOriginAccessControl",
+			    "cloudfront:ListOriginAccessControls"
+			  ],
+			  "Resource":"*"
+			},
       {
         "Effect" : "Allow",
         "Action" : ["dynamodb:*"],
@@ -96,10 +106,20 @@ resource "aws_iam_policy" "github_policy" {
         ]
       },
       {
-        "Effect" : "Allow",
-        "Action" : ["cloudfront:CreateInvalidation"],
-        "Resource" : "*"
-      },
+			  "Effect":"Allow",
+			  "Action":[
+			    "cloudfront:CreateDistribution",
+			    "cloudfront:UpdateDistribution",
+			    "cloudfront:GetDistribution",
+			    "cloudfront:ListDistributions",
+			    "cloudfront:TagResource",
+			    "cloudfront:CreateOriginAccessControl",
+			    "cloudfront:UpdateOriginAccessControl",
+			    "cloudfront:GetOriginAccessControl",
+			    "cloudfront:ListOriginAccessControls"
+			  ],
+			  "Resource":"*"
+			},
       {
         "Effect" : "Allow",
         "Action" : [
