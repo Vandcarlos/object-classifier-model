@@ -15,8 +15,8 @@ jobs:
     strategy:
       matrix:
         dir:
-          - infra/stacks/oidc_github
-          - infra/stacks/artifacts
+          - infra/stack/oidc_github
+          - infra/stack/artifacts
     steps:
       - uses: actions/checkout@v4
       - uses: hashicorp/setup-terraform@v3
