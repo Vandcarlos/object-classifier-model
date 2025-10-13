@@ -19,18 +19,47 @@ jobs:
           - infra/stack/artifacts
     steps:
       - uses: actions/checkout@v4
+
+      # DEBUG: mostra o que o runner enxerga
+      - name: Show repo tree
+        run: |
+          pwd
+          ls -la
+          find infra -maxdepth 3 -type d | sort || true
+
       - uses: hashicorp/setup-terraform@v3
+
       - name: Configure AWS (OIDC)
         uses: aws-actions/configure-aws-credentials@v4
         with:
           role-to-assume: arn:aws:iam::048153623156:role/github-ml-artifacts-deploy
           aws-region: us-east-1
-      - name: Init & Plan
-        working-directory: ${{ matrix.dir }}
+
+      # init do backend S3/DynamoDB
+      - name: Terraform init
+        run: terraform -chdir=${{ matrix.dir }} init -input=false
+
+      # IMPORT automático do bucket, só para o stack artifacts
+      - name: Import S3 bucket into state (artifacts only)
+        if: matrix.dir == 'infra/stacks/artifacts'
         run: |
-          terraform init -input=false
-          terraform plan -out=tf.plan -input=false
-      - name: Apply (auto)
+          set -e
+          BUCKET="ml-artifacts-048153623156"
+          # se o recurso ainda não está no state e o bucket existe, importa
+          if ! terraform -chdir=infra/stacks/artifacts state list | grep -q '^aws_s3_bucket\.artifacts$'; then
+            if aws s3api head-bucket --bucket "$BUCKET" 2>/dev/null; then
+              echo "Importing existing bucket $BUCKET into Terraform state..."
+              terraform -chdir=infra/stacks/artifacts import aws_s3_bucket.artifacts "$BUCKET"
+            else
+              echo "Bucket $BUCKET not found; skipping import."
+            fi
+          else
+            echo "Bucket already in state; skipping import."
+          fi
+
+      - name: Terraform plan
+        run: terraform -chdir=${{ matrix.dir }} plan -out=tf.plan -input=false
+
+      - name: Terraform apply
         if: github.ref == 'refs/heads/main'
-        working-directory: ${{ matrix.dir }}
-        run: terraform apply --auto-approve tf.plan
+        run: terraform -chdir=${{ matrix.dir }} apply --auto-approve tf.plan
