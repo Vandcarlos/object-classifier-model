@@ -68,12 +68,19 @@ data "aws_iam_policy_document" "backend_s3" {
   }
 
   statement {
-    sid     = "BucketPolicyRead"
+    sid     = "BucketReadMetadataAll"
     effect  = "Allow"
     actions = [
       "s3:GetBucketPolicy",
       "s3:GetBucketAcl",
-      "s3:GetBucketLocation"
+      "s3:GetBucketLocation",
+      "s3:GetBucketVersioning",
+      "s3:GetBucketTagging",
+      "s3:GetEncryptionConfiguration",
+      "s3:GetBucketPolicyStatus",
+      "s3:GetBucketOwnershipControls",
+      "s3:GetPublicAccessBlock",
+      "s3:GetBucketCors"
     ]
     resources = [
       "arn:aws:s3:::ml-artifacts-*",
