@@ -68,6 +68,20 @@ data "aws_iam_policy_document" "backend_s3" {
   }
 
   statement {
+    sid     = "BucketPolicyRead"
+    effect  = "Allow"
+    actions = [
+      "s3:GetBucketPolicy",
+      "s3:GetBucketAcl",
+      "s3:GetBucketLocation"
+    ]
+    resources = [
+      "arn:aws:s3:::ml-artifacts-*",
+      "arn:aws:s3:::tfstate-ml-*"
+    ]
+  }
+
+  statement {
     sid     = "CRUDStateObjects"
     effect  = "Allow"
     actions = ["s3:GetObject","s3:PutObject","s3:DeleteObject","s3:AbortMultipartUpload"]
