@@ -23,9 +23,9 @@ variable "state_bucket_name" {
   default = "tfstate-ml-sandbox"
 }
 
-variable "state_bucket_prefix" {
+variable "state_bucket_prefix_root" {
   type    = string
-  default = "services/object-classifier/oidc"
+  default = "services/object-classifier"
 }
 
 variable "lock_table_name" {

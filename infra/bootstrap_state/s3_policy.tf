@@ -13,7 +13,7 @@ data "aws_iam_policy_document" "tfstate_bucket_policy" {
     condition {
       test     = "StringLike"
       variable = "s3:prefix"
-      values   = ["${var.state_bucket_prefix}/*"]
+      values   = ["${var.state_bucket_prefix_root}/*"]
     }
   }
 
@@ -21,7 +21,7 @@ data "aws_iam_policy_document" "tfstate_bucket_policy" {
     sid     = "CRUDStateObjects"
     effect  = "Allow"
     actions = ["s3:GetObject","s3:PutObject","s3:DeleteObject","s3:AbortMultipartUpload"]
-    resources = ["arn:aws:s3:::${var.state_bucket_name}/${var.state_bucket_prefix}/*"]
+    resources = ["arn:aws:s3:::${var.state_bucket_name}/${var.state_bucket_prefix_root}/*"]
 
     principals {
       type        = "AWS"
