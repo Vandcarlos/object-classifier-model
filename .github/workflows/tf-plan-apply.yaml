@@ -8,12 +8,15 @@ permissions:
   id-token: write
   contents: read
 
+concurrency:
+  group: tf-account-infra
+  cancel-in-progress: false
+
 jobs:
   oidc:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-
       - uses: hashicorp/setup-terraform@v3
 
       - name: Configure AWS (OIDC)
@@ -36,18 +39,17 @@ jobs:
 
       - name: Init & Plan (OIDC)
         run: |
-          terraform -chdir=infra/stack/oidc_github init -input=false
-          terraform -chdir=infra/stack/oidc_github plan -out=tf.plan -input=false
+          terraform -chdir=infra/stack/oidc_github init -input=false -reconfigure
+          terraform -chdir=infra/stack/oidc_github plan -out=tf.plan -input=false -lock-timeout=5m
 
       - name: Apply (OIDC)
-        run: terraform -chdir=infra/stack/oidc_github apply --auto-approve tf.plan
+        run: terraform -chdir=infra/stack/oidc_github apply --auto-approve tf.plan -lock-timeout=5m
 
   artifacts:
-    needs: oidc   # <— garante ordem
+    needs: oidc
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-
       - uses: hashicorp/setup-terraform@v3
 
       - name: Configure AWS (OIDC) - fresh session
@@ -57,9 +59,8 @@ jobs:
           aws-region: us-east-1
 
       - name: Init (artifacts)
-        run: terraform -chdir=infra/stack/artifacts init -input=false
+        run: terraform -chdir=infra/stack/artifacts init -input=false -reconfigure
 
-      # importa o bucket existente para o state remoto (idempotente)
       - name: Import S3 bucket into state (artifacts)
         env: { BUCKET: ml-artifacts-048153623156 }
         run: |
@@ -71,7 +72,7 @@ jobs:
           fi
 
       - name: Plan (artifacts)
-        run: terraform -chdir=infra/stack/artifacts plan -out=tf.plan -input=false
+        run: terraform -chdir=infra/stack/artifacts plan -out=tf.plan -input=false -lock-timeout=5m
 
       - name: Apply (artifacts)
-        run: terraform -chdir=infra/stack/artifacts apply --auto-approve tf.plan
+        run: terraform -chdir=infra/stack/artifacts apply --auto-approve tf.plan -lock-timeout=5m
