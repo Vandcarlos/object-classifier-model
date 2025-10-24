@@ -43,7 +43,7 @@ jobs:
           terraform -chdir=infra/stack/oidc_github plan -out=tf.plan -input=false -lock-timeout=5m
 
       - name: Apply (OIDC)
-        run: terraform -chdir=infra/stack/oidc_github apply --auto-approve tf.plan -lock-timeout=5m
+        run: terraform -chdir=infra/stack/oidc_github apply -lock-timeout=5m --auto-approve tf.plan
 
   artifacts:
     needs: oidc
