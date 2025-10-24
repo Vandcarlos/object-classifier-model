@@ -1,15 +1,3 @@
-terraform {
-  required_version = ">= 1.6.0"
-
-  backend "s3" {
-    bucket         = "tfstate-ml-sandbox"
-    key            = "services/object-classifier/oidc/terraform.tfstate"
-    region         = "us-east-1"
-    dynamodb_table = "tfstate-ml-locks" # o warning depreciação pode ser ignorado por enquanto
-    encrypt        = true
-  }
-}
-
 provider "aws" {
   region = "us-east-1"
 }
