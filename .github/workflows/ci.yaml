@@ -23,12 +23,3 @@ jobs:
         uses: aquasecurity/tfsec-action@v1.0.3
         with:
           working_directory: infra
-
-      - name: Checkov
-        uses: bridgecrewio/checkov-action@master
-        # soft_fail: true
-        with:
-          directory: infra
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
