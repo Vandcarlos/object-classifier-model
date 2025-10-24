@@ -13,16 +13,32 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+
       - uses: hashicorp/setup-terraform@v3
+
       - name: Configure AWS (OIDC)
         uses: aws-actions/configure-aws-credentials@v4
         with:
           role-to-assume: arn:aws:iam::048153623156:role/github-ml-artifacts-deploy
           aws-region: us-east-1
+
+      - name: Who am I (debug)
+        run: aws sts get-caller-identity
+
+      - name: Can I see the remote backend object?
+        env:
+          BUCKET: tfstate-ml-sandbox
+          KEY: services/object-classifier/oidc/terraform.tfstate
+        run: |
+          set -e
+          aws s3api head-object --bucket "$BUCKET" --key "$KEY" || true
+          aws s3api list-objects-v2 --bucket "$BUCKET" --prefix "$(dirname $KEY)/" || true
+
       - name: Init & Plan (OIDC)
         run: |
           terraform -chdir=infra/stack/oidc_github init -input=false
           terraform -chdir=infra/stack/oidc_github plan -out=tf.plan -input=false
+
       - name: Apply (OIDC)
         run: terraform -chdir=infra/stack/oidc_github apply --auto-approve tf.plan
 
@@ -31,7 +47,9 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+
       - uses: hashicorp/setup-terraform@v3
+
       - name: Configure AWS (OIDC) - fresh session
         uses: aws-actions/configure-aws-credentials@v4
         with:
@@ -54,5 +72,6 @@ jobs:
 
       - name: Plan (artifacts)
         run: terraform -chdir=infra/stack/artifacts plan -out=tf.plan -input=false
+
       - name: Apply (artifacts)
         run: terraform -chdir=infra/stack/artifacts apply --auto-approve tf.plan

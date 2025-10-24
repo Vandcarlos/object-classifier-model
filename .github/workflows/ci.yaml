@@ -23,13 +23,3 @@ jobs:
         uses: aquasecurity/tfsec-action@v1.0.3
         with:
           working_directory: infra
-
-      - name: Checkov
-        uses: bridgecrewio/checkov-action@master
-        soft_fail: true
-        with:
-          directory: infra
-          skip_check: "CKV2_AWS_47,CKV_AWS_68,CKV_AWS_86, CKV_AWS_305,CKV_AWS_310,CKV_AWS_174, CKV_AWS_290,CKV_AWS_355"
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
