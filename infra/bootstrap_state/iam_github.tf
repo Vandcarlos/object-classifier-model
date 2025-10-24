@@ -73,7 +73,8 @@ data "aws_iam_policy_document" "backend_s3" {
     actions = [
       "s3:GetBucket*",
       "s3:GetEncryptionConfiguration",
-      "s3:GetPublicAccessBlock"
+      "s3:GetPublicAccessBlock",
+      "s3:GetAccelerateConfiguration"
     ]
     resources = [
       "arn:aws:s3:::ml-artifacts-*",
