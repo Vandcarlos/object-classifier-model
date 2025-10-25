@@ -164,7 +164,9 @@ data "aws_iam_policy_document" "artifacts_admin" {
       "cloudfront:UpdateDistribution",
       "cloudfront:GetDistribution",
       "cloudfront:ListDistributions",
-      "cloudfront:TagResource"
+      "cloudfront:TagResource",
+      "cloudfront:ListTagsForResource",
+      "cloudfront:DeleteDistribution"
     ]
     resources = ["*"]
   }
