@@ -71,6 +71,19 @@ jobs:
             fi
           fi
 
+      - name: Import CloudFront OAC into state (artifacts)
+        run: |
+          set -e
+          OAC_NAME="oac-ml-artifacts"
+          OAC_ID="$(aws cloudfront list-origin-access-controls \
+            --query "OriginAccessControlList.Items[?Name=='${OAC_NAME}'].Id" \
+            --output text || true)"
+          if ! terraform -chdir=infra/stack/artifacts state list | grep -q '^aws_cloudfront_origin_access_control\.oac$'; then
+            if [ -n "$OAC_ID" ] && [ "$OAC_ID" != "None" ]; then
+              terraform -chdir=infra/stack/artifacts import aws_cloudfront_origin_access_control.oac "$OAC_ID"
+            fi
+          fi
+
       - name: Plan (artifacts)
         run: terraform -chdir=infra/stack/artifacts plan -out=tf.plan -input=false -lock-timeout=5m
 

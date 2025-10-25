@@ -126,3 +126,56 @@ resource "aws_iam_role_policy_attachment" "attach_dynamodb_lock" {
   role       = aws_iam_role.github_actions.name
   policy_arn = aws_iam_policy.dynamodb_lock.arn
 }
+
+# Policy extra para o stack "artifacts"
+data "aws_iam_policy_document" "artifacts_admin" {
+  # S3 bucket-level writes necessários pelo Terraform
+  statement {
+    effect = "Allow"
+    actions = [
+      "s3:PutBucketPolicy",
+      "s3:PutBucketPublicAccessBlock",
+      # (opcionais conforme seu código)
+      "s3:PutBucketOwnershipControls",
+      "s3:PutBucketTagging",
+      "s3:PutBucketVersioning"
+    ]
+    resources = [
+      "arn:aws:s3:::ml-artifacts-*"
+    ]
+  }
+
+  # S3 objeto (se já não tiver em outra policy)
+  statement {
+    effect = "Allow"
+    actions = ["s3:GetObject","s3:PutObject","s3:DeleteObject"]
+    resources = ["arn:aws:s3:::ml-artifacts-*/*"]
+  }
+
+  # CloudFront para OAC e Distribution
+  statement {
+    effect = "Allow"
+    actions = [
+      "cloudfront:CreateOriginAccessControl",
+      "cloudfront:UpdateOriginAccessControl",
+      "cloudfront:GetOriginAccessControl",
+      "cloudfront:ListOriginAccessControls",
+      "cloudfront:CreateDistribution",
+      "cloudfront:UpdateDistribution",
+      "cloudfront:GetDistribution",
+      "cloudfront:ListDistributions",
+      "cloudfront:TagResource"
+    ]
+    resources = ["*"]
+  }
+}
+
+resource "aws_iam_policy" "artifacts_admin" {
+  name   = "${var.github_role_name}-artifacts-admin"
+  policy = data.aws_iam_policy_document.artifacts_admin.json
+}
+
+resource "aws_iam_role_policy_attachment" "attach_artifacts_admin" {
+  role       = aws_iam_role.github_actions.name
+  policy_arn = aws_iam_policy.artifacts_admin.arn
+}
