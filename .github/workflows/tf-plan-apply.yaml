@@ -75,4 +75,4 @@ jobs:
         run: terraform -chdir=infra/stack/artifacts plan -out=tf.plan -input=false -lock-timeout=5m
 
       - name: Apply (artifacts)
-        run: terraform -chdir=infra/stack/artifacts apply --auto-approve tf.plan -lock-timeout=5m
+        run: terraform -chdir=infra/stack/artifacts apply -lock-timeout=5m --auto-approve tf.plan
