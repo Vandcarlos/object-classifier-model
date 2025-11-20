@@ -9,8 +9,16 @@ MODEL_LABELS_PATH = CFG["paths"]["trained"]["labels"]
 LABELS_URL = CFG["labels_url"]
 
 def main():
+    cfg = load_config()
+    train_cfg = cfg.training
+    result = train_model(train_cfg)
+
+    print(f"Modelo treinado salvo em: {result.model_path}")
+    print(f"Labels salvas em: {result.labels_path}")
+    print(f"Métricas: {result.metrics}")
+
     model_base, model_trained, labels = train_model(labels_url = LABELS_URL)
-    
+
     save_base_model(model_base)
     save_trained_model(model_trained)
     save_labels(labels)
